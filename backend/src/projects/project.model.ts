@@ -27,6 +27,9 @@ const projectSchema = new Schema(
     },
   },
   {
+    // Fail fast: without a database connection, queries throw at once
+    // instead of waiting up to 10 seconds in Mongoose's buffer.
+    bufferCommands: false,
     // Adds createdAt and updatedAt, managed by Mongoose.
     timestamps: true,
     toJSON: {

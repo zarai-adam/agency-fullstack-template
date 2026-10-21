@@ -4,6 +4,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import mongoose from "mongoose";
 import { projectsRouter } from "./projects/project.routes.js";
 
 export const app = express();
@@ -20,6 +21,18 @@ app.get("/health", (_req, res) => {
   res.status(200).json({
     status: "ok",
   });
+});
+
+// Readiness: can this instance serve requests right now? Unlike /health
+// (the process is alive), this fails while MongoDB is not connected, so a
+// load balancer can stop sending traffic here. readyState 1 = connected.
+app.get("/health/ready", (_req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    res.status(200).json({ status: "ready" });
+    return;
+  }
+
+  res.status(503).json({ status: "not_ready" });
 });
 
 app.use("/projects", projectsRouter);
