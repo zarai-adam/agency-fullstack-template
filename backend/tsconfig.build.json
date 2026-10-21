@@ -1,0 +1,15 @@
+{
+  // Production build: compiles src/ to JavaScript in dist/.
+  // tsconfig.json stays the config for editors, `npm run typecheck`, and
+  // tests (it includes tests/ and does not emit files).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    // Only Node's types: Vitest globals must not leak into production code.
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "tests"]
+}
