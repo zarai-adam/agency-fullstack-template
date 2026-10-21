@@ -6,4 +6,6 @@ import { afterEach } from "vitest";
 // Unmount rendered components after each test so tests stay independent.
 afterEach(() => {
   cleanup();
+  // The page is chosen from the URL hash, so reset it to the Overview page.
+  window.location.hash = "";
 });

@@ -26,6 +26,52 @@ export function mockApiRoutes(routes: Record<string, RouteHandler>) {
   }) as typeof apiRequest);
 }
 
+// A tiny in-memory backend with the same response shapes as the real one:
+// POST and PATCH return the project, DELETE returns { message, id }, and GET
+// returns the stored list newest first. `overrides` replaces any route, e.g.
+// to make one request fail. Returns the stored list so tests can inspect it.
+export function fakeBackend(
+  initial: Project[],
+  overrides: Record<string, RouteHandler> = {},
+) {
+  const stored = [...initial];
+  const indexOf = (id: string) =>
+    stored.findIndex((project) => project.id === id);
+
+  const routes: Record<string, RouteHandler> = {
+    "GET projects": () => [...stored],
+    "POST projects": (init) => {
+      // Like the real backend, a new project is stamped with the current time.
+      const now = new Date().toISOString();
+      const project = makeProject({
+        ...JSON.parse(String(init?.body)),
+        createdAt: now,
+        updatedAt: now,
+      });
+      stored.unshift(project);
+      return project;
+    },
+  };
+
+  for (const { id } of initial) {
+    routes[`PATCH projects/${id}`] = (init) => {
+      stored[indexOf(id)] = {
+        ...stored[indexOf(id)],
+        ...JSON.parse(String(init?.body)),
+        updatedAt: "2026-10-21T12:00:00.000Z",
+      };
+      return stored[indexOf(id)];
+    };
+    routes[`DELETE projects/${id}`] = () => {
+      stored.splice(indexOf(id), 1);
+      return { message: "Project deleted", id };
+    };
+  }
+
+  mockApiRoutes({ ...routes, ...overrides });
+  return stored;
+}
+
 let nextId = 1;
 
 export function makeProject(overrides: Partial<Project> = {}): Project {

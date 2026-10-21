@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Badge } from "../../components/ui/Badge";
+import { routeHrefs } from "../../lib/useHashRoute";
 import { ProjectListItem } from "./ProjectListItem";
-import type { Project } from "./types";
+import { useProjectActions } from "./useProjectActions";
 import type { ProjectsState } from "./useProjects";
 
 type RecentProjectsProps = {
@@ -18,24 +19,11 @@ export function RecentProjects({
   onChanged,
   limit = 5,
 }: RecentProjectsProps) {
-  const [announcement, setAnnouncement] = useState("");
   const heading = useRef<HTMLHeadingElement>(null);
-
-  async function handleUpdated(project: Project) {
-    await onChanged();
-    setAnnouncement(`Changes to "${project.name}" saved.`);
-  }
-
-  async function handleDeleted(project: Project, alreadyDeleted: boolean) {
-    await onChanged();
-    setAnnouncement(
-      alreadyDeleted
-        ? `"${project.name}" had already been deleted.`
-        : `Project "${project.name}" deleted.`,
-    );
-    // The deleted item's buttons are gone, so move focus somewhere sensible.
-    heading.current?.focus();
-  }
+  const { announcement, handleUpdated, handleDeleted } = useProjectActions({
+    reload: onChanged,
+    focusAfterDelete: heading,
+  });
 
   return (
     <section className="card" aria-labelledby="projects-heading">
@@ -91,6 +79,12 @@ export function RecentProjects({
           )}
         </>
       )}
+
+      <p>
+        <a className="text-link" href={routeHrefs.projects}>
+          View all projects
+        </a>
+      </p>
     </section>
   );
 }

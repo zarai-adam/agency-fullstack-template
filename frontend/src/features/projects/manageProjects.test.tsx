@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiRequest } from "../../lib/api";
-import { deferred, makeProject, mockApiRoutes } from "../../test/mockApi";
+import { deferred, fakeBackend, makeProject } from "../../test/mockApi";
 import { DashboardPage } from "../dashboard/DashboardPage";
 import type { Project } from "./types";
 
@@ -16,38 +16,6 @@ vi.mock("../../lib/api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../lib/api")>()),
   apiRequest: vi.fn(),
 }));
-
-type Routes = Parameters<typeof mockApiRoutes>[0];
-
-// A tiny in-memory backend with the same response shapes as the real one:
-// PATCH returns the updated project, DELETE returns { message, id }.
-// `overrides` replaces any route, e.g. to make one request fail.
-function fakeBackend(initial: Project[], overrides: Routes = {}) {
-  const stored = [...initial];
-  const routes: Routes = { "GET projects": () => [...stored] };
-
-  for (const { id } of initial) {
-    routes[`PATCH projects/${id}`] = (init) => {
-      const index = stored.findIndex((project) => project.id === id);
-      stored[index] = {
-        ...stored[index],
-        ...JSON.parse(String(init?.body)),
-        updatedAt: "2026-10-21T12:00:00.000Z",
-      };
-      return stored[index];
-    };
-    routes[`DELETE projects/${id}`] = () => {
-      stored.splice(
-        stored.findIndex((project) => project.id === id),
-        1,
-      );
-      return { message: "Project deleted", id };
-    };
-  }
-
-  mockApiRoutes({ ...routes, ...overrides });
-  return stored;
-}
 
 function callsTo(method: string) {
   return vi

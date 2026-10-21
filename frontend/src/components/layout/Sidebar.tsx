@@ -18,7 +18,7 @@ export function Sidebar({ items, activeId }: SidebarProps) {
               {item.available ? (
                 <a
                   className="sidebar__link"
-                  href="#main-content"
+                  href={item.href}
                   aria-current={item.id === activeId ? "page" : undefined}
                 >
                   {item.label}

@@ -17,6 +17,8 @@ import { validateProject } from "./validateProject";
 
 type CreateProjectFormProps = {
   onCreated: (project: Project) => void;
+  // Focus the Name field on mount, e.g. when the form was just opened.
+  autoFocus?: boolean;
 };
 
 type SubmitState =
@@ -28,7 +30,10 @@ type SubmitState =
 const GENERIC_ERROR =
   "Could not create the project. Check your connection and try again.";
 
-export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
+export function CreateProjectForm({
+  onCreated,
+  autoFocus = false,
+}: CreateProjectFormProps) {
   const id = useId();
   const [values, setValues] = useState<ProjectFormValues>(emptyProjectValues);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -88,6 +93,7 @@ export function CreateProjectForm({ onCreated }: CreateProjectFormProps) {
           values={values}
           errors={fieldErrors}
           onChange={handleChange}
+          autoFocusName={autoFocus}
         />
 
         <button type="submit" className="button" disabled={isSubmitting}>

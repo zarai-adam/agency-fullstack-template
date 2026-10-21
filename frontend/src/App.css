@@ -501,3 +501,46 @@
 h2[tabindex="-1"]:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* ---------- Projects page ---------- */
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.create-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.create-panel > .card {
+  width: 100%;
+  max-width: 640px;
+}
+
+/* Search takes the full row on phones, and two columns on wider screens. */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+
+@media (min-width: 640px) {
+  .filters__search {
+    grid-column: span 2;
+  }
+}
+
+.empty-state .button {
+  margin-top: 8px;
+}
+
+.text-link {
+  color: var(--accent);
+  font-weight: 600;
+}
