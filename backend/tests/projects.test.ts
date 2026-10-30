@@ -1,11 +1,23 @@
 import { Types } from "mongoose";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
-import { app } from "../src/app.js";
+import { createApp } from "../src/app.js";
 import { ProjectModel } from "../src/projects/project.model.js";
+import { defaultProjectRateLimits } from "../src/rateLimit.js";
 import { useTestDatabase } from "./helpers/testDb.js";
 
 useTestDatabase();
+
+// These tests send far more than 20 writes, so they use an app with very
+// high limits: rate limiting is tested on its own in rateLimit.test.ts.
+// Production limits are unchanged.
+const app = createApp({
+  projectRateLimits: {
+    ...defaultProjectRateLimits,
+    general: 100_000,
+    writes: 100_000,
+  },
+});
 
 // A well-formed ID that no project in the test database has.
 const missingId = () => new Types.ObjectId().toHexString();
